@@ -109,6 +109,7 @@
                     })
 
                 });
+
                 $("#link-page").click(function(){
                     whitelisted_domains= whitelisted_domains.concat(currentMerchantDomain);
                     updateWhiteListDomain(whitelisted_domains);
@@ -121,21 +122,36 @@
 
                 function updateWhiteListDomain(domains){
                     httpRequest.open( "POST",`https://graph.facebook.com/me/messenger_profile?access_token=${page_access_token}`)
-                            httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                            console.log(domains);
-                            let body={  
-                                "whitelisted_domains":domains, 
+                    httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                    console.log(domains);
+                    let body={  
+                        "whitelisted_domains":domains, 
+                    }
+                    httpRequest.send(JSON.stringify(body));
+                }
+                function httpCall(method, url,body){
+                    return new Promise((resolve,reject)=>{
+                        let call = new XMLHttpRequest();
+                        call.open(method, url);
+                        call.onload=function(){
+                            if(this.status>=200 && this.status < 300){
+                                resolve(call.response)
+                            } else{
+                                reject({
+                                    status: this.status,
+                                    statusText:call.statusText
+                                });
                             }
-                            httpRequest.send(JSON.stringify(body));
+                            call.send(body);
+                        }
+
+                    })
                 }
 
                 httpRequest.onreadystatechange = function(response){
-                    if (httpRequest.readyState === 4) {
-                        alert("Success");
+                    httpRequest.readyState === 4?alert("Success"):alert("Failed")
                     }
                 }
-
-           
             }
             );
          </script>
