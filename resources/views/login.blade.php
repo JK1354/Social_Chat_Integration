@@ -35,39 +35,23 @@
                     });
                 }
 
-
-
-
-
                 let httpRequest = new XMLHttpRequest();
                 let accessToken= null;
                 let userID=null;
+                let page_array=[];
+                let whitelisted_domains=[]
+                let currentMerchantDomain="https://abc.com.my"
+                let page_access_token=null;
+                let linkable=true;
 
                 $("#fb-logout").click(function(){
                     console.log("logging out")
                     FB.getLoginStatus(function(response) {
                     if (response.status === 'connected') {
                             FB.logout(function(response) {
-                                // this part just clears the $_SESSION var
-                                // replace with your own code
                                     console.log("logged out")
                                 $('#status').text('Logged out');
                             });
-                        }
-                    });
-                });
-
-                $("#fb-page").click(function(){
-                    FB.getLoginStatus(function(response) {
-                        if (response.status === 'connected') {
-                            accessToken=response.authResponse.accessToken;
-                            userID= response.authResponse.userID;
-                            console.log(accessToken, userID);
-                            FB.api(`/${userID}/accounts`, function(response){
-                                // console.log(response);
-                                let page_array = [];
-                                page_array=response.data;
-                            })
                         }
                     });
                 });
@@ -76,29 +60,15 @@
                     accessToken=response.authResponse.accessToken;
                     userID= response.authResponse.userID;
                     console.log(accessToken, userID);
+                    //fetch page ID
                     FB.api(`/${userID}/accounts`, function(response){
-                        // console.log(response);
-                        let page_array = [];
                         page_array=response.data;
-                        page_array.forEach(element => {
-                            $("#page-id").append(new Option(element.name, element.id));
+                        page_array.forEach((element,index) => {
+                            $("#page-id").append(new Option(element.name, index));
                         });
                     })
-
-                    // let app_id = "817707895553386"
-                    // let app_secret = "8b1de0ecb898c3c35e391f9bf64dcc63"
-                    // let api_endpoint = `${userID}/accounts`
-
-                    // //get user app access token 
-                    // httpRequest.open( "GET",`"https://graph.facebook.com/oauth/access_token?client_id=${app_id}&client_secret=${app_secret}&grant_type=client_credentials"`)
-                    // httpRequest.send();
-
-                    // //fetch page ID list that user manage
-                    // console.log( `https://graph.facebook.com/${api_endpoint}&access_token=${accessToken}`);
-                    // httpRequest.open( "GET",`https://graph.facebook.com/${api_endpoint}&access_token=${accessToken}`)
-                    // httpRequest.send();
                 }
-
+                
                 $("#fb-login").click(function(){
                     console.log("feawef");
                     FB.getLoginStatus(function(response) {
@@ -115,9 +85,39 @@
                     });
                 })
 
+                $("#page-id").change(function(){
+                    console.log(accessToken,userID,page_array, $("#page-id option:selected").index(),page_array[$("#page-id option:selected").index()].access_token);
+                    page_access_token=page_array[$("#page-id option:selected").index()].access_token;
+                    FB.api('me/messenger_profile',{fields:"whitelisted_domains",access_token:page_access_token}, function(response){
+
+                        whitelisted_domains= response.data[0].whitelisted_domains;
+                        whitelisted_domains.forEach((element,index)=>{
+                            //reg exp, remove the "/" at the very end of a string
+                            element.replace(/\/$/,'')===currentMerchantDomain.replace(/\/$/,'')?linkable=false:''
+                        })
+
+                        console.log(whitelisted_domains,linkable);
+
+                        if (linkable){
+                            httpRequest.open( "POST",`https://graph.facebook.com/me/messenger_profile?fields=whitelisted_domains,greeting&access_token=${page_access_token}`)
+                            httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                            whitelisted_domains= whitelisted_domains.concat(currentMerchantDomain)
+                            console.log(whitelisted_domains);
+                            let body={  
+                                "whitelisted_domains":whitelisted_domains, 
+                            }
+                            httpRequest.send(JSON.stringify(body));
+                
+                        }
+                    })
+
+                });
+
                 httpRequest.onreadystatechange = function(response){
                     console.log(response);
                 }
+
+           
             }
             );
          </script>
@@ -128,33 +128,29 @@
     <body>
 
     <div id="fb-root"></div>
-        <!-- <script async defer crossorigin="anonymous" 
-        src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v11.0&appId=817707895553386&autoLogAppEvents=1" 
-        nonce="nIgFaJ4K"></script>
-
-        <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false"></div>
-        <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
-        </fb:login-button> -->
         <div class="container" >
             <button id="fb-login">Login Here</button>
             <button id="fb-logout">Logout Here</button>
-            <button id="fb-page">Get Page List</button>
             <span id="status"/>
             <span id="message"/>
-            <button>Add whitelist domain</button>
+            <button id="log">Log</button>
         </div>
-        <form>
+
             <div class="row">
                 <div class="col-3">
                     <div class="form-group">
-                        <label> Availabe Page</label>
+                        <label>Choose which page to be link</label>
                         <select class="form-control form-control-sm"" id="page-id" >
-                            <option>fawefaef</option>
+                            <option disabled selected value>select a page</option>
                         </select>
+            
+                        <label>Current domain name</label>
+                        <button id="link-page">Link</button>
+                        <button id="unlink-page">Unlink</button>
+                        <span id="domian-list"></span>
                     </div>
                 </div>
             </div>
-        </form>
 
     </body>
 </html>
