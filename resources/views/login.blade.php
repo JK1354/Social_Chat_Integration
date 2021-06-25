@@ -68,7 +68,7 @@
                         });
                     })
                 }
-                
+
                 $("#fb-login").click(function(){
                     console.log("feawef");
                     FB.getLoginStatus(function(response) {
@@ -86,35 +86,53 @@
                 })
 
                 $("#page-id").change(function(){
-                    console.log(accessToken,userID,page_array, $("#page-id option:selected").index(),page_array[$("#page-id option:selected").index()].access_token);
-                    page_access_token=page_array[$("#page-id option:selected").index()].access_token;
-                    FB.api('me/messenger_profile',{fields:"whitelisted_domains",access_token:page_access_token}, function(response){
+                    console.log(accessToken,userID,page_array, $("#page-id option:selected").index()-1,page_array[$("#page-id option:selected").index()-1].access_token);
+                    page_access_token=page_array[$("#page-id option:selected").index()-1].access_token;
 
-                        whitelisted_domains= response.data[0].whitelisted_domains;
-                        whitelisted_domains.forEach((element,index)=>{
-                            //reg exp, remove the "/" at the very end of a string
-                            element.replace(/\/$/,'')===currentMerchantDomain.replace(/\/$/,'')?linkable=false:''
-                        })
-
-                        console.log(whitelisted_domains,linkable);
-
-                        if (linkable){
-                            httpRequest.open( "POST",`https://graph.facebook.com/me/messenger_profile?fields=whitelisted_domains,greeting&access_token=${page_access_token}`)
-                            httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                            whitelisted_domains= whitelisted_domains.concat(currentMerchantDomain)
-                            console.log(whitelisted_domains);
-                            let body={  
-                                "whitelisted_domains":whitelisted_domains, 
+                    FB.api('me/messenger_profile',{fields:"whitelisted_domains,greeting",access_token:page_access_token}, function(response){
+                        if (!response || response.error) {
+                              alert("Error Please Refresh this page")
+                        } 
+                        else{
+                            if (response.data.length!=0 ){
+                                whitelisted_domains= response.data[0].whitelisted_domains;
+                                whitelisted_domains.forEach((element,index)=>{
+                                    //reg exp, remove the "/" at the very end of a string
+                                    element.replace(/\/$/,'')===currentMerchantDomain.replace(/\/$/,'')?linkable=false:''
+                                })
                             }
-                            httpRequest.send(JSON.stringify(body));
-                
+                            else{
+                                linkable=true //no domain available
+                            }
+                            linkable?$("#link-page").prop("disabled",false):$("#unlink-page").prop("disabled",false)
                         }
                     })
 
                 });
+                $("#link-page").click(function(){
+                    whitelisted_domains= whitelisted_domains.concat(currentMerchantDomain);
+                    updateWhiteListDomain(whitelisted_domains);
+                });
+                $("#unlink-page").click(function(){
+                    whitelisted_domains= whitelisted_domains.filter(function(value,index){
+                        return value.replace(/\/$/,'') !== currentMerchantDomain.replace(/\/$/,'')});
+                    updateWhiteListDomain(whitelisted_domains);
+                });
+
+                function updateWhiteListDomain(domains){
+                    httpRequest.open( "POST",`https://graph.facebook.com/me/messenger_profile?access_token=${page_access_token}`)
+                            httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                            console.log(domains);
+                            let body={  
+                                "whitelisted_domains":domains, 
+                            }
+                            httpRequest.send(JSON.stringify(body));
+                }
 
                 httpRequest.onreadystatechange = function(response){
-                    console.log(response);
+                    if (httpRequest.readyState === 4) {
+                        alert("Success");
+                    }
                 }
 
            
@@ -141,12 +159,12 @@
                     <div class="form-group">
                         <label>Choose which page to be link</label>
                         <select class="form-control form-control-sm"" id="page-id" >
-                            <option disabled selected value>select a page</option>
+                            <option disabled selected>select a page</option>
                         </select>
             
                         <label>Current domain name</label>
-                        <button id="link-page">Link</button>
-                        <button id="unlink-page">Unlink</button>
+                        <button id="link-page" disabled> Link</button>
+                        <button id="unlink-page" disabled>Unlink</button>
                         <span id="domian-list"></span>
                     </div>
                 </div>
