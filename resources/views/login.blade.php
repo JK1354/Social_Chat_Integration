@@ -185,21 +185,23 @@
             <button id="log">Log</button>
         </div>
 
-            <div class="row">
-                <div class="col-3">
-                    <div class="form-group">
-                        <label>Choose which page to be link</label>
-                        <select class="form-control form-control-sm"" id="page-id" >
-                            <option disabled selected>select a page</option>
-                        </select>
-            
-                        <label>Current domain name</label>
-                        <button id="link-page" disabled> Link</button>
-                        <button id="unlink-page" disabled>Unlink</button>
-                        <span id="domian-list"></span>
-                    </div>
+        <div class="row">
+            <div class="col-3">
+                <div class="form-group">
+                    <label>Choose which page to be link</label>
+                    <select class="form-control form-control-sm"" id="page-id" >
+                        <option disabled selected>select a page</option>
+                    </select>
+        
+                    <label>Current domain name</label>
+                    <button id="link-page" disabled> Link</button>
+                    <button id="unlink-page" disabled>Unlink</button>
+                    <span id="domian-list"></span>
                 </div>
             </div>
+        </div>
+        
+
 
     </body>
 </html>
