@@ -8,9 +8,9 @@ class SocialController extends Controller
 {
     //
     public function update(Request $request){
-        dd('receive')
+        dd('receive');
     }
     public function unlink(Request $request){
-        dd('receive')
+        dd('receive');
     }
 }
