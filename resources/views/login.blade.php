@@ -43,6 +43,7 @@
                 let currentMerchantDomain="https://abc.com.my"
                 let page_access_token=null;
                 let linkable=true;
+                let link_action =null;
 
                 $("#fb-logout").click(function(){
                     console.log("logging out")
@@ -111,10 +112,12 @@
                 });
 
                 $("#link-page").click(function(){
+                    link_action=true;
                     whitelisted_domains= whitelisted_domains.concat(currentMerchantDomain);
                     updateWhiteListDomain(whitelisted_domains);
                 });
                 $("#unlink-page").click(function(){
+                    link_action=false;
                     whitelisted_domains= whitelisted_domains.filter(function(value,index){
                         return value.replace(/\/$/,'') !== currentMerchantDomain.replace(/\/$/,'')});
                     updateWhiteListDomain(whitelisted_domains);
@@ -149,8 +152,20 @@
                 }
 
                 httpRequest.onreadystatechange = function(response){
-                    httpRequest.readyState === 4?alert("Success"):alert("Failed")
+                    if(httpRequest.readyState === 4){
+                        if(link_action){
+                            console.log("calling")
+                            httpCall("get","/link/efawefawef").then(console.log(response))
+                        }
+                        else if(!link_action){
+                           
+                        }
+                        alert("Success")
                     }
+                    else{
+                        alert("Failed")
+                    }
+                   
                 }
             }
             );
