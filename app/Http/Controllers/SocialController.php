@@ -50,21 +50,34 @@ class SocialController extends Controller
         //get respective page token and check domain name 
         $getDomain =env('FAPI')."/me/messenger_profile?"."fields=whitelisted_domains"."&access_token=".$page_access_token;
         $domains= Http::get($getDomain)->json();
-        $whitelist_domians= $domains["data"][0]["whitelisted_domains"];
+        $domains= $domains["data"][0]["whitelisted_domains"];
         $domain_present= false;
-        foreach ($whitelist_domians as $key => $value){
-            if($value == $request->domain_name){
+        foreach ($domains as $key => $value){
+            if(rtrim($value,"/") == rtrim($request->domain_name,"/")){
                 $domain_present=!$domain_present;
             }
+            $whitelist_domians[]=rtrim($value,"/");
         }
 
-        //update wehitelist domain array to fb 
+
         $whitelist_url= env("FAPI")."me/messenger_profile"."?access_token=".$page_access_token;
         // dd($whitelist_domians,!$domain_present, $request->remove_action=="false", $request->domain_name!=null);
         if(!$domain_present && $request->remove_action=="false" && $request->domain_name!=null){
-            // $whitelist_domians=array_push($whitelist_domians, $request->domain_name);
-            // $whitelist_domians +=array($request->domain_name);
+ 
             $whitelist_domians[]=$request->domain_name;
+
+            $domain_whitelist= HTTP::withHeaders([
+                "Content-Type"=> "application/json",
+                "charset"=> "UTF-8"
+            ])->post($whitelist_url,[
+                "whitelisted_domains"=> $whitelist_domians, 
+            ]);
+            return $domain_whitelist;
+        }
+        else if($domain_present && $request->remove_action=="true" && $request->domain_name!=null){
+ 
+            $whitelist_domians=array_diff( $whitelist_domians, array($request->domain_name));
+            // dd($domains,$whitelist_domians,array($request->domain_name),array_diff( $whitelist_domians, array($request->domain_name)));
             // dd($whitelist_domians, $whitelist_domians[]=$request->domain_name);
             $domain_whitelist= HTTP::withHeaders([
                 "Content-Type"=> "application/json",
