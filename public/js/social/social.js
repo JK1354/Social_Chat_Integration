@@ -16,19 +16,15 @@ $(function(){
             fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
 
-    function checkLoginState() {
-        FB.getLoginStatus(function(response) {
-            statusChangeCallback(response);
-        });
-    }
-
     let httpRequest = new XMLHttpRequest();
     let accessToken= null;
     let userID=null;
     let page_array=[];
     let whitelisted_domains=[]
     let currentMerchantDomain="https://abc.com.my"
+    let base_url = "https://phoneserving.ddns.net/"
     let page_access_token=null;
+    let current_page_id;
     let linkable=true;
     let link_action =null;
 
@@ -74,9 +70,9 @@ $(function(){
     })
 
     $("#page-id").change(function(){
-        console.log(accessToken,userID,page_array, $("#page-id option:selected").index()-1,page_array[$("#page-id option:selected").index()-1].access_token);
+        // console.log(accessToken,userID,page_array, $("#page-id option:selected").index()-1,page_array[$("#page-id option:selected").index()-1].access_token);
         page_access_token=page_array[$("#page-id option:selected").index()-1].access_token;
-
+    current_page_id=page_array[$("#page-id option:selected").index()-1].id
         FB.api('me/messenger_profile',{fields:"whitelisted_domains,greeting",access_token:page_access_token}, function(response){
             if (!response || response.error) {
                   alert("Error Please Refresh this page")
@@ -113,12 +109,18 @@ $(function(){
     function updateWhiteListDomain(domains){
         httpRequest.open( "POST",`https://graph.facebook.com/me/messenger_profile?access_token=${page_access_token}`)
         httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        console.log(domains);
         let body={  
             "whitelisted_domains":domains, 
         }
         httpRequest.send(JSON.stringify(body));
     }
+    function updatePageID(id,unlink=false){
+        httpRequest.open( "GET",`${base_url}social${unlink?"/unlink":`/link/${id}`}`)
+        httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        console.log(`${base_url}social${unlink?"/unlink":`/link/${id}`}`)
+        // httpRequest.send();
+    }
+
     function httpCall(method, url,body){
         return new Promise((resolve,reject)=>{
             let call = new XMLHttpRequest();
@@ -139,10 +141,11 @@ $(function(){
     }
 
     httpRequest.onreadystatechange = function(response){
+        console.log(response)
         if(httpRequest.readyState === 4){
             if(link_action){
-                console.log("calling")
-                httpCall("get","/link/efawefawef").then(console.log(response))
+               console.log("calling")
+               updatePageID(current_page_id,false)
             }
             else if(!link_action){
                
