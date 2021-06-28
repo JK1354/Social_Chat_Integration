@@ -44,13 +44,22 @@ $(function(){
         accessToken=response.authResponse.accessToken;
         userID= response.authResponse.userID;
         console.log(accessToken, userID);
+
+        //pass user token to backend 
+        httpRequest.open("POST",`${base_url}api/social/user`) 
+        httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        let body={  
+            "token":response.authResponse.accessToken,
+            "id": response.authResponse.userID
+        }
+        httpRequest.send(JSON.stringify(body));
         //fetch page ID
-        FB.api(`/${userID}/accounts`, function(response){
-            page_array=response.data;
-            page_array.forEach((element,index) => {
-                $("#page-id").append(new Option(element.name, index));
-            });
-        })
+        // FB.api(`/${userID}/accounts`, function(response){
+        //     page_array=response.data;
+        //     page_array.forEach((element,index) => {
+        //         $("#page-id").append(new Option(element.name, index));
+        //     });
+        // })
     }
 
     $("#fb-login").click(function(){
@@ -72,7 +81,7 @@ $(function(){
     $("#page-id").change(function(){
         // console.log(accessToken,userID,page_array, $("#page-id option:selected").index()-1,page_array[$("#page-id option:selected").index()-1].access_token);
         page_access_token=page_array[$("#page-id option:selected").index()-1].access_token;
-    current_page_id=page_array[$("#page-id option:selected").index()-1].id
+        current_page_id=page_array[$("#page-id option:selected").index()-1].id
         FB.api('me/messenger_profile',{fields:"whitelisted_domains,greeting",access_token:page_access_token}, function(response){
             if (!response || response.error) {
                   alert("Error Please Refresh this page")
@@ -121,39 +130,17 @@ $(function(){
         // httpRequest.send();
     }
 
-    function httpCall(method, url,body){
-        return new Promise((resolve,reject)=>{
-            let call = new XMLHttpRequest();
-            call.open(method, url);
-            call.onload=function(){
-                if(this.status>=200 && this.status < 300){
-                    resolve(call.response)
-                } else{
-                    reject({
-                        status: this.status,
-                        statusText:call.statusText
-                    });
-                }
-                call.send(body);
-            }
-
-        })
-    }
-
     httpRequest.onreadystatechange = function(response){
         console.log(response)
         if(httpRequest.readyState === 4){
-            if(link_action){
-               console.log("calling")
-               updatePageID(current_page_id,false)
-            }
-            else if(!link_action){
+            // if(link_action){
+            //    console.log("calling")
+            //    updatePageID(current_page_id,false)
+            // }
+            // else if(!link_action){
                
-            }
-            alert("Success")
-        }
-        else{
-            alert("Failed")
+            // }
+            // alert("Success")
         }
        
     }

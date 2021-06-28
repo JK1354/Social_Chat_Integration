@@ -19,6 +19,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::prefix('social')->group(function () {
-    Route::get('/link/{id}',["as"=>"get", "uses" => "SocialController@update"]);
-    Route::get('/unlink',["as"=>"unlink", "uses" => "SocialController@unlink"]);
+    Route::post('/user',["as"=>"get", "uses" => "SocialController@post"]);
+    Route::post('/update',["as"=>"get", "uses" => "SocialController@updateDomains"]);
+    // Route::get('/unlink',["as"=>"unlink", "uses" => "SocialController@unlink"]);
 });
