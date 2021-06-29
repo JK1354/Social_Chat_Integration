@@ -13,10 +13,9 @@ class SocialController extends Controller
         //get page list and page access token 
         $url=env('FAPI').$request->id."/accounts"."?access_token=".$request->token;
         $available_page = HTTP::get($url)->json();
-        
         $page_list=[];
         foreach ($available_page["data"]as $key => $value) {
-           $getDomain =env('FAPI')."/me/messenger_profile?"."fields=whitelisted_domains"."&access_token=".$value["access_token"] ;
+            $getDomain =env('FAPI')."/me/messenger_profile?"."fields=whitelisted_domains"."&access_token=".$value["access_token"] ;
             $domains= Http::get($getDomain)->json();
 
             $page_details=array(

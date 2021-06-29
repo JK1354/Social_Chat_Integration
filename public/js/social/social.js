@@ -61,6 +61,9 @@ $(function(){
 
 
     $("#fb-login").click(function(){
+        $('#mySelect').find('option').remove()
+        .end().append('<option selected disabled>text</option>')
+    ;
         FB.getLoginStatus(function(response) {
             if (response.status === 'connected') {
                 is_connected(response);
@@ -97,15 +100,22 @@ $(function(){
             method: 'post',
             url: `${base_url}api/social/update`,
             data: {
-                "token":response.authResponse.accessToken,
-                "id": response.authResponse.userID,
+                "token":accessToken,
+                "id": userID,
                 "domain_name":currentMerchantDomain,
                 "remove_action":"false",
                 "page_id":page_list[parseInt($("#page-id option:selected").val())].id
             }
           }).then(function(response){
-            console.log(response.data)
-
+            console.log(response.data.result,response)
+            if(response.data.result=="success"){
+                 alert("Update Success")
+                 $("#link-page").prop("disabled",true)
+                 $("#unlink-page").prop("disabled",false)
+            }
+            else{
+                alert(response.data.error.mesage)
+            }
           });
     });
     $("#unlink-page").click(function(){
@@ -113,14 +123,22 @@ $(function(){
             method: 'post',
             url: `${base_url}api/social/update`,
             data: {
-                "token":response.authResponse.accessToken,
-                "id": response.authResponse.userID,
+                "token":accessToken,
+                "id": userID,
                 "domain_name":currentMerchantDomain,
                 "remove_action":"true",
                 "page_id":page_list[parseInt($("#page-id option:selected").val())].id
             }
           }).then(function(response){
-            console.log(response.data)
+            console.log(response.data.result,response)
+            if(response.data.result=="success"){
+                alert("Update Success")
+                $("#link-page").prop("disabled",false)
+                $("#unlink-page").prop("disabled",true)
+           }
+           else{
+               alert(response.data.error.mesage)
+           }
           });
     });
 }
