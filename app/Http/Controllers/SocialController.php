@@ -74,7 +74,7 @@ class SocialController extends Controller
                 "whitelisted_domains"=> $whitelist_domians, 
             ]);
             self::updateMerchantPageID($request->remove_action=="true", $request->page_id);
-//            return $updte_domain_call;
+           return $update_domain_call;
         }
         else if($domain_present && $request->remove_action=="true" && $request->domain_name!=null){
  
@@ -87,25 +87,22 @@ class SocialController extends Controller
                 "whitelisted_domains"=> $whitelist_domians, 
             ]);
            self::updateMerchantPageID($request->remove_action=="true", $request->page_id);
-//            return $updte_domain_call;
+           return $update_domain_call;
         }
         // dd($update_domain_call);
-
- 	
     }
 
     static function updateMerchantPageID($remove, $page_id){
         
-        $merchantPage_ID=PageID::where("page_id", "!=", null)->first();
-        // dd($merchantPage_ID, "why null");
+        $merchantPage_ID=PageID::where("id", "=", 1)->first();
         if($remove){
-            $merchantPage_ID->update(["page_id"=>$page_id]);
-        }
-        else{
             $merchantPage_ID->update(["page_id"=>null]);
         }
+        else{
+            $merchantPage_ID->update(["page_id"=>$page_id]);
+        }
     
-        dd($merchantPage_ID,$remove, $page_id);
+        // dd($merchantPage_ID,$remove, $page_id);
 
     }
 }

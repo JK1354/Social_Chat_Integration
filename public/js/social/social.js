@@ -114,7 +114,7 @@ $(function(){
                  $("#unlink-page").prop("disabled",false)
             }
             else{
-                alert(response.data.error.mesage)
+                alert(response.data.error.message)
             }
           });
     });
@@ -137,7 +137,7 @@ $(function(){
                 $("#unlink-page").prop("disabled",true)
            }
            else{
-               alert(response.data.error.mesage)
+               alert(response.data.error.message)
            }
           });
     });
