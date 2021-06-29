@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
+use App\Modal\PageID;
+
 class SocialController extends Controller
 {
     //
@@ -58,40 +60,52 @@ class SocialController extends Controller
             $whitelist_domians[]=rtrim($value,"/");
         }
 
-
+        $update_domain_call=null;
         $whitelist_url= env("FAPI")."me/messenger_profile"."?access_token=".$page_access_token;
-        // dd($whitelist_domians,!$domain_present, $request->remove_action=="false", $request->domain_name!=null);
+       
         if(!$domain_present && $request->remove_action=="false" && $request->domain_name!=null){
  
             $whitelist_domians[]=$request->domain_name;
 
-            $domain_whitelist= HTTP::withHeaders([
+            $update_domain_call= HTTP::withHeaders([
                 "Content-Type"=> "application/json",
                 "charset"=> "UTF-8"
             ])->post($whitelist_url,[
                 "whitelisted_domains"=> $whitelist_domians, 
             ]);
-            return $domain_whitelist;
+            self::updateMerchantPageID($request->remove_action=="true", $request->page_id);
+//            return $updte_domain_call;
         }
         else if($domain_present && $request->remove_action=="true" && $request->domain_name!=null){
  
             $whitelist_domians=array_diff( $whitelist_domians, array($request->domain_name));
-            // dd($domains,$whitelist_domians,array($request->domain_name),array_diff( $whitelist_domians, array($request->domain_name)));
-            // dd($whitelist_domians, $whitelist_domians[]=$request->domain_name);
-            $domain_whitelist= HTTP::withHeaders([
+    
+            $update_domain_call= HTTP::withHeaders([
                 "Content-Type"=> "application/json",
                 "charset"=> "UTF-8"
             ])->post($whitelist_url,[
                 "whitelisted_domains"=> $whitelist_domians, 
             ]);
-            return $domain_whitelist;
+           self::updateMerchantPageID($request->remove_action=="true", $request->page_id);
+//            return $updte_domain_call;
         }
-    //    return $domain_whitelist;
+        // dd($update_domain_call);
 
-
+ 	
     }
 
-    public function unlink(Request $request){
-        dd('receive');
+    static function updateMerchantPageID($remove, $page_id){
+        
+        $merchantPage_ID=PageID::where("page_id", "!=", null)->first();
+        // dd($merchantPage_ID, "why null");
+        if($remove){
+            $merchantPage_ID->update(["page_id"=>$page_id]);
+        }
+        else{
+            $merchantPage_ID->update(["page_id"=>null]);
+        }
+    
+        dd($merchantPage_ID,$remove, $page_id);
+
     }
 }
