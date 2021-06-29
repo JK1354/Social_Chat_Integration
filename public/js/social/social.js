@@ -16,16 +16,12 @@ $(function(){
             fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
 
-    let httpRequest = new XMLHttpRequest();
+
     let accessToken= null;
     let userID=null;
-    let page_array=[];
-    let whitelisted_domains=[]
+    let page_list=null;
     let currentMerchantDomain="https://abc.com.my"
     let base_url = "https://phoneserving.ddns.net/"
-    let page_access_token=null;
-    let current_page_id;
-    let linkable=true;
     let link_action =null;
 
     $("#fb-logout").click(function(){
@@ -45,25 +41,26 @@ $(function(){
         userID= response.authResponse.userID;
         console.log(accessToken, userID);
 
-        //pass user token to backend 
-        httpRequest.open("POST",`${base_url}api/social/user`) 
-        httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        let body={  
-            "token":response.authResponse.accessToken,
-            "id": response.authResponse.userID
-        }
-        httpRequest.send(JSON.stringify(body));
-        //fetch page ID
-        // FB.api(`/${userID}/accounts`, function(response){
-        //     page_array=response.data;
-        //     page_array.forEach((element,index) => {
-        //         $("#page-id").append(new Option(element.name, index));
-        //     });
-        // })
+        //parse available page list
+        axios({
+            method: 'post',
+            url: `${base_url}api/social/user`,
+            data: {
+                "token":response.authResponse.accessToken,
+                "id": response.authResponse.userID
+            }
+          }).then(function(response){
+            console.log(response.data)
+            page_list = response.data
+            page_list.forEach((element,index)=>{
+                //add page to list
+                $("#page-id").append(new Option(element.name, index));
+            })
+          });
     }
 
+
     $("#fb-login").click(function(){
-        console.log("feawef");
         FB.getLoginStatus(function(response) {
             if (response.status === 'connected') {
                 is_connected(response);
@@ -79,70 +76,52 @@ $(function(){
     })
 
     $("#page-id").change(function(){
-        // console.log(accessToken,userID,page_array, $("#page-id option:selected").index()-1,page_array[$("#page-id option:selected").index()-1].access_token);
-        page_access_token=page_array[$("#page-id option:selected").index()-1].access_token;
-        current_page_id=page_array[$("#page-id option:selected").index()-1].id
-        FB.api('me/messenger_profile',{fields:"whitelisted_domains,greeting",access_token:page_access_token}, function(response){
-            if (!response || response.error) {
-                  alert("Error Please Refresh this page")
-            } 
-            else{
-                if (response.data.length!=0 ){
-                    whitelisted_domains= response.data[0].whitelisted_domains;
-                    whitelisted_domains.forEach((element,index)=>{
-                        //reg exp, remove the "/" at the very end of a string
-                        element.replace(/\/$/,'')===currentMerchantDomain.replace(/\/$/,'')?linkable=false:''
-                    })
-                }
-                else{
-                    linkable=true //no domain available
-                }
-                linkable?$("#link-page").prop("disabled",false):$("#unlink-page").prop("disabled",false)
-            }
+        let linkable=true;
+        console.log($("#page-id option:selected").val())
+        page_list[parseInt($("#page-id option:selected").val())].domain_list.forEach((element,index)=>{
+            element.replace(/\/$/,'')===currentMerchantDomain.replace(/\/$/,'')?linkable=false:''
+            console.log(element,linkable);
         })
-
+        if(linkable){
+            $("#link-page").prop("disabled",false)
+            $("#unlink-page").prop("disabled",true)
+        }
+        else{
+            $("#link-page").prop("disabled",true)
+            $("#unlink-page").prop("disabled",false)
+        }               
     });
 
     $("#link-page").click(function(){
-        link_action=true;
-        whitelisted_domains= whitelisted_domains.concat(currentMerchantDomain);
-        updateWhiteListDomain(whitelisted_domains);
+        axios({
+            method: 'post',
+            url: `${base_url}api/social/update`,
+            data: {
+                "token":response.authResponse.accessToken,
+                "id": response.authResponse.userID,
+                "domain_name":currentMerchantDomain,
+                "remove_action":"false",
+                "page_id":page_list[parseInt($("#page-id option:selected").val())].id
+            }
+          }).then(function(response){
+            console.log(response.data)
+
+          });
     });
     $("#unlink-page").click(function(){
-        link_action=false;
-        whitelisted_domains= whitelisted_domains.filter(function(value,index){
-            return value.replace(/\/$/,'') !== currentMerchantDomain.replace(/\/$/,'')});
-        updateWhiteListDomain(whitelisted_domains);
+        axios({
+            method: 'post',
+            url: `${base_url}api/social/update`,
+            data: {
+                "token":response.authResponse.accessToken,
+                "id": response.authResponse.userID,
+                "domain_name":currentMerchantDomain,
+                "remove_action":"true",
+                "page_id":page_list[parseInt($("#page-id option:selected").val())].id
+            }
+          }).then(function(response){
+            console.log(response.data)
+          });
     });
-
-    function updateWhiteListDomain(domains){
-        httpRequest.open( "POST",`https://graph.facebook.com/me/messenger_profile?access_token=${page_access_token}`)
-        httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        let body={  
-            "whitelisted_domains":domains, 
-        }
-        httpRequest.send(JSON.stringify(body));
-    }
-    function updatePageID(id,unlink=false){
-        httpRequest.open( "GET",`${base_url}social${unlink?"/unlink":`/link/${id}`}`)
-        httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        console.log(`${base_url}social${unlink?"/unlink":`/link/${id}`}`)
-        // httpRequest.send();
-    }
-
-    httpRequest.onreadystatechange = function(response){
-        console.log(response)
-        if(httpRequest.readyState === 4){
-            // if(link_action){
-            //    console.log("calling")
-            //    updatePageID(current_page_id,false)
-            // }
-            // else if(!link_action){
-               
-            // }
-            // alert("Success")
-        }
-       
-    }
 }
 );
