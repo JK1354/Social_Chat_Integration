@@ -26,6 +26,7 @@
     <div class='content'>
         <h1> ChatHead.</h1>
         <p> Chat widget is loading, it will took around 3 seconds to load.</p>
+        <p>Optimisation: BError,FE envparsing</p>
         <p> To whitelist domain:</p>
         <ul>
             <ol>Visit https://phoneserving.ddns.net/fb</ol>
