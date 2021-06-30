@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('social_plugin');
-});
+}); 
 Route::get('/fb', function () {
     return view('login');
 });

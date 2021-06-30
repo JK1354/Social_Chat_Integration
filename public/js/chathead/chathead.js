@@ -1,8 +1,19 @@
 
 let toggle_callbell =false;
-let fb_appID = '{{env('FAPP_ID')}}';
+
+let fb_appID = null;
+let base_url = "https://phoneserving.ddns.net/";
 
 $(document).ready(function(){
+    console.log(fb_appID)
+    axios({
+            method: 'get',
+            url: `${base_url}api/merchant?id=1`
+          }).then(function(response){
+            console.log(response.data);
+            fb_appID=response.data.app_id;
+            $(".fb-customerchat").attr("page_id",response.data.page_id)
+          })
     
     // Update tooltips width 
     $("#chatHeadTooltips p").css('width',$("#chatHeadTooltips p").width());

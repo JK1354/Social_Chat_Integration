@@ -9,7 +9,17 @@ use App\Modal\PageID;
 
 class SocialController extends Controller
 {
-    //
+    public function get(Request $request){
+        $this_merchant= PageID::where("id",$request->id)->first();
+        $response=[
+            "page_id"=>$this_merchant->page_id,
+            "app_id"=>env("FAPP_ID")
+        ];
+        return $response;
+        
+        // dd($request->id);
+    }
+
     public function post(Request $request){
         // return $request->token;
         //get page list and page access token 
@@ -77,9 +87,9 @@ class SocialController extends Controller
            return $update_domain_call;
         }
         else if($domain_present && $request->remove_action=="true" && $request->domain_name!=null){
- 
-            $whitelist_domians=array_diff( $whitelist_domians, array($request->domain_name));
-    
+
+            $whitelist_domians=array_diff( $whitelist_domians, array(rtrim($request->domain_name,"/")));
+            // dd(array($request->domain_name)  ,$whitelist_domians,array_diff( $whitelist_domians, array($request->domain_name)),array_diff(array($request->domain_name),$whitelist_domians, ));
             $update_domain_call= HTTP::withHeaders([
                 "Content-Type"=> "application/json",
                 "charset"=> "UTF-8"

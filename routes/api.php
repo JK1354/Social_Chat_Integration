@@ -23,3 +23,6 @@ Route::prefix('social')->group(function () {
     Route::post('/update',["as"=>"get", "uses" => "SocialController@updateDomains"]);
     // Route::get('/unlink',["as"=>"unlink", "uses" => "SocialController@unlink"]);
 });
+
+
+Route::get('/merchant',["as"=>"get", "uses" => "SocialController@get"]);

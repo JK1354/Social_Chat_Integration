@@ -9,11 +9,15 @@
     <title>ChatHead</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <link href="css/chathead/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        
 
     <!-- Chathead style & script -->
     <link href="css/chathead/chathead.css" rel="stylesheet">
     <script src="js/chathead/chathead.js" type="text/javascript"></script>
-
+    {{-- <script>
+        let fb_appID = {!! json_encode($data)!!};
+    </script> --}}
 </head>
 
 <body>    
@@ -22,6 +26,15 @@
     <div class='content'>
         <h1> ChatHead.</h1>
         <p> Chat widget is loading, it will took around 3 seconds to load.</p>
+        <p> To whitelist domain:</p>
+        <ul>
+            <ol>Visit https://phoneserving.ddns.net/fb</ol>
+            <ol>Login in with cloudsite account</ol>
+            <ol>Choose available page to link</ol>
+            <ol>Click Add to add current domain to whitelist</ol>
+            <ol>Visit https://phoneserving.ddns.net</ol>
+            <ol>Try to chat</ol>
+        </ul>
     </div>
 
     <!-- Chathead Module -->
@@ -46,7 +59,7 @@
                 </div>
                 <div class='chathead-item'>
                     <div id="fb-root"></div>
-                    <div class="fb-customerchat" greeting_dialog_display="hide" page_id="113568843682948"
+                    <div class="fb-customerchat" greeting_dialog_display="hide" page_id=""
                         minimized="false">
                     </div>
                 </div>

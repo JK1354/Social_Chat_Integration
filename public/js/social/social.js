@@ -20,7 +20,7 @@ $(function(){
     let accessToken= null;
     let userID=null;
     let page_list=null;
-    let currentMerchantDomain="https://abc.com.my"
+    let currentMerchantDomain= "https://phoneserving.ddns.net/"
     let base_url = "https://phoneserving.ddns.net/"
     let link_action =null;
 
